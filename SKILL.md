@@ -1,7 +1,7 @@
 ---
 name: code-restore-point
 description: |
-  Create Git stash restore points (snapshots) before code modifications, record modification notes,
+  Create Git HEAD commit snapshots before code modifications, record modification notes,
   and restore to the pre-modification state at any time. Trigger before any code modification.
   Typical scenarios:
   - User says "help me change xxx", "modify xxx", "refactor xxx", "adjust xxx"
@@ -11,7 +11,6 @@ tags:
   - openclaw
   - openclaw-skill
   - code-backup
-  - git-stash
   - restore-point
   - snapshot
   - code-protection
@@ -26,9 +25,13 @@ tags:
 
 ## How It Works
 
-Uses Git stash to create lightweight snapshots. Execute `create` before modifying any code to
-record current state + modification intent; execute `restore` to fully revert the workspace
-to the pre-modification state.
+Before any code modification, record the current HEAD commit SHA. After modification is complete,
+the user can restore the entire workspace to that exact snapshot state using `git reset --hard`.
+
+- Uncommitted changes are automatically committed before creating the snapshot
+- Supports workspaces with or without initial commits (auto-initializes if needed)
+- After restore, that snapshot is removed from the index (prevents double-apply)
+- Restore point entries that reference deleted commits are auto-cleaned via `cleanup`
 
 ## Usage
 
@@ -82,15 +85,15 @@ AI instruction example:
 ```
 I am about to modify [file/code]. Creating a restore point first...
 [Create restore point]
-Restore point [#1] created.
+Restore point [#1] created (HEAD: abc1234).
 [Perform modification...]
 Modification complete. To revert, say "restore to restore point #1".
 ```
 
-## Notes
+## Technical Details
 
-- The current workspace must be a Git repository (non-repo directories will error)
-- After restoring, that record is removed from the index (prevents double-apply)
-- Stash includes all modifications (tracked + untracked files)
-- Multiple modifications can create multiple restore points, ordered by time
-- Cleanup command removes orphaned records no longer present in the stash list
+- Works in any Git repository (auto-initializes if no commits exist)
+- Snapshot = current HEAD commit SHA (git reset --hard on restore)
+- Uncommitted changes are auto-committed before snapshot (no data loss)
+- Index stored at `.restore-points.json` in workspace root
+- Windows GBK console compatible (UTF-8 output)
