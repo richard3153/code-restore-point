@@ -7,6 +7,19 @@ description: |
   - User says "help me change xxx", "modify xxx", "refactor xxx", "adjust xxx"
   - User wants to edit, modify, or rewrite files, code, or projects
   - User is concerned about breaking things and says "backup first" or "in case I need to revert"
+tags:
+  - openclaw
+  - openclaw-skill
+  - code-backup
+  - git-stash
+  - restore-point
+  - snapshot
+  - code-protection
+  - git-tools
+  - developer-tools
+  - automation
+  - refactoring
+  - rollback
 ---
 
 # Code Restore Point (code-restore-point)
