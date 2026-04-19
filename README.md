@@ -8,7 +8,7 @@
 
 ### Overview
 
-`code-restore-point` is an OpenClaw skill that creates Git stash-based snapshots of your workspace before any code modification. It lets you freely experiment and refactor, knowing you can instantly revert to the exact pre-modification state at any time.
+`code-restore-point` is an OpenClaw skill that creates Git HEAD commit snapshots of your workspace before any code modification. It records the current HEAD commit SHA, allowing you to instantly revert to that exact state using `git reset --hard` at any time.
 
 ### Use Cases
 
@@ -20,11 +20,12 @@
 
 ### Key Features
 
-- **One-command snapshot**: Captures full workspace state (tracked + untracked) in seconds
+- **One-command snapshot**: Records current HEAD commit SHA; auto-commits any uncommitted changes first
 - **Named restore points**: Attach a note to each snapshot so you know what it's for
-- **Instant rollback**: Revert to any previous restore point by index or shortcut
+- **Instant rollback**: `git reset --hard` to the recorded commit — full workspace restored
+- **Auto-initialize**: Works in non-Git directories (auto-initializes if needed)
 - **Clean index**: Automatically removes consumed restore points to prevent double-apply
-- **Orphan cleanup**: Safely prunes stale records with interactive confirmation
+- **Orphan cleanup**: Safely prunes stale records referencing deleted commits
 
 ### Installation
 
@@ -103,9 +104,17 @@ AI response:
 [Done] To revert: say "restore to restore point #1"
 ```
 
+### Technical Details
+
+- **Snapshot mechanism**: Records `git rev-parse HEAD` (current commit SHA)
+- **Uncommitted changes**: Auto-commits with `[RP-AUTO]` message before snapshot
+- **Restore mechanism**: `git reset --hard <sha>` — reverts both HEAD and working tree
+- **No data loss**: Current uncommitted changes are auto-committed before restore
+- **Windows compatible**: UTF-8 output with GBK console fallback
+
 ### Requirements
 
-- Git repository (the workspace must be initialized with `git init`)
+- Git (auto-initializes if repository doesn't exist)
 - Python 3.7+
 - OpenClaw runtime (for AI agent integration)
 
@@ -114,7 +123,7 @@ AI response:
 ```
 code-restore-point/
 ├── SKILL.md                     # OpenClaw skill definition
-├── README.md                     # Bilingual documentation (this file)
+├── README.md                    # Bilingual documentation (this file)
 ├── scripts/
 │   └── create_restore_point.py  # Core script
 └── code-restore-point.skill     # Packaged skill bundle
@@ -126,7 +135,7 @@ code-restore-point/
 
 ### 简介
 
-`code-restore-point` 是一个 OpenClaw 技能，在对代码进行任何修改之前，使用 Git stash 创建工作区快照。让你可以自由地重构和实验，随时一键回滚到修改前的精确状态。
+`code-restore-point` 是一个 OpenClaw 技能，在修改代码前记录当前 Git HEAD commit SHA，随时可通过 `git reset --hard` 一键回滚到该状态。
 
 ### 使用场景
 
@@ -138,11 +147,12 @@ code-restore-point/
 
 ### 核心功能
 
-- **一键快照**：秒级捕获完整工作区状态（已跟踪 + 未跟踪文件）
+- **一键快照**：记录当前 HEAD commit SHA；未提交变更自动提交后记录
 - **命名还原点**：每个快照附带备注，方便识别用途
-- **即时回滚**：按索引或快捷命令恢复到任意历史状态
+- **即时回滚**：`git reset --hard` 到记录的 commit — 完整还原工作区
+- **自动初始化**：非 Git 目录自动初始化
 - **自动清理**：恢复后自动从索引移除，防止重复应用
-- **孤儿清理**：交互式确认清理过期记录
+- **孤儿清理**：清理指向已删除 commit 的过期记录
 
 ### 安装
 
@@ -218,9 +228,17 @@ AI 响应示例：
 [完成] 如需回滚，请说"恢复到还原点 #1"
 ```
 
+### 技术细节
+
+- **快照机制**：记录 `git rev-parse HEAD`（当前 commit SHA）
+- **未提交变更**：快照前自动提交（消息 `[RP-AUTO]`）
+- **还原机制**：`git reset --hard <sha>` — 同时还原 HEAD 和工作区
+- **无数据丢失**：还原前自动提交当前未提交变更
+- **Windows 兼容**：UTF-8 输出，GBK 控制台兼容
+
 ### 系统要求
 
-- Git 仓库（工作区需已执行 `git init`）
+- Git（仓库不存在时自动初始化）
 - Python 3.7+
 - OpenClaw 运行时（用于 AI 代理集成）
 
